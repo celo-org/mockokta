@@ -23,6 +23,7 @@ func NewClient() *MockClient {
 	c.Group = &GroupResource{
 		Client:     c,
 		GroupRoles: make(map[string][]*okta.Role),
+        GroupUsers: make(map[string][]string),
 	}
 	c.User = &UserResource{
 		Client: c,
@@ -59,7 +60,7 @@ func (client *MockClient) ListUsers(ctx context.Context, qp *query.Params) ([]*o
 }
 
 func (client *MockClient) AddUserToGroup(ctx context.Context, groupId string, userId string) (*okta.Response, error) {
-    return client.Group.AddUserToGroup(ctx, groupId, userId)
+	return client.Group.AddUserToGroup(ctx, groupId, userId)
 }
 
 func (g *GroupResource) CreateGroup(ctx context.Context, group okta.Group) (*okta.Group, *okta.Response, error) {
@@ -93,7 +94,15 @@ func NewGroup(groupName string) *okta.Group {
 }
 
 func (g *GroupResource) AddUserToGroup(ctx context.Context, groupId string, userId string) (*okta.Response, error) {
-	g.GroupUsers[groupId] = append(g.GroupUsers[groupId], userId)
+	group, err := g.GetGroupById(groupId)
+	if err != nil {
+		return nil, err
+	}
+	user, err := g.Client.User.GetUserById(userId)
+	if err != nil {
+		return nil, err
+	}
+	g.GroupUsers[group.Profile.Name] = append(g.GroupUsers[group.Profile.Name], (*user.Profile)["email"].(string))
 	return nil, nil
 }
 
@@ -129,6 +138,15 @@ func (g *GroupResource) GroupContainsRole(group okta.Group, roleType string) boo
 	for _, groupRole := range g.GroupRoles[group.Profile.Name] {
 
 		if groupRole.Type == roleType {
+			return true
+		}
+	}
+	return false
+}
+
+func (g *GroupResource) GroupContainsUser(group okta.Group, userEmail string) bool {
+	for _, groupUser := range g.GroupUsers[group.Profile.Name] {
+        if groupUser == userEmail {
 			return true
 		}
 	}
@@ -173,9 +191,18 @@ func (u *UserResource) ListUsers(ctx context.Context, qp *query.Params) ([]*okta
 	return u.Users, nil, nil
 }
 
-func (u *UserResource) GetUserByEmail(ctx context.Context, email string) (*okta.User, error) {
+func (u *UserResource) GetUserByEmail(email string) (*okta.User, error) {
 	for _, user := range u.Users {
 		if (*user.Profile)["email"] == email {
+			return user, nil
+		}
+	}
+	return nil, fmt.Errorf("user not found")
+}
+
+func (u *UserResource) GetUserById(userId string) (*okta.User, error) {
+	for _, user := range u.Users {
+		if user.Id == userId {
 			return user, nil
 		}
 	}

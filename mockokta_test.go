@@ -196,10 +196,54 @@ func TestUserResource_CreateUser(t *testing.T) {
 		client := NewClient()
 
 		want, _ := client.User.CreateUser(userEmail)
-		got, _ := client.User.GetUserByEmail(context.TODO(), userEmail)
+		got, _ := client.User.GetUserByEmail(userEmail)
 
 		if !reflect.DeepEqual(got, want) {
 			t.Errorf("got %v want %v", got, want)
+		}
+	})
+}
+
+func TestGroupResource_AddUserToGroup(t *testing.T) {
+	t.Run("should err if group doesn't exist", func(t *testing.T) {
+		userEmailArg := "TestUser@test.com"
+		groupNameArg := "NonexistentUser"
+
+		client := NewClient()
+		client.User.CreateUser(userEmailArg)
+
+		_, err := client.Group.AddUserToGroup(context.TODO(), groupNameArg, userEmailArg)
+
+		if err == nil {
+			t.Errorf("expected error but didn't get one")
+		}
+	})
+
+	t.Run("should err if user doesn't exist", func(t *testing.T) {
+		userEmailArg := "NonexistentUser"
+		groupNameArg := "TestGroup"
+
+		client := NewClient()
+		group, _, _ := client.Group.CreateGroup(context.TODO(), *NewGroup(groupNameArg))
+		_, err := client.Group.AddUserToGroup(context.TODO(), group.Id, userEmailArg)
+
+		if err == nil {
+			t.Errorf("expected error but didn't get one %v", err)
+		}
+	})
+
+	t.Run("should add user to group", func(t *testing.T) {
+        userEmailArg := "TestUser@test.com"
+		groupNameArg := "TestGroup"
+
+		client := NewClient()
+		group, _, _ := client.Group.CreateGroup(context.TODO(), *NewGroup(groupNameArg))
+        user, _ := client.User.CreateUser(userEmailArg)
+
+		client.Group.AddUserToGroup(context.TODO(), group.Id, user.Id)
+
+        if !client.Group.GroupContainsUser(*group, userEmailArg) {
+			t.Errorf("expected group %v to contain user %v but it did not", groupNameArg, userEmailArg)
 		}
 	})
 }
