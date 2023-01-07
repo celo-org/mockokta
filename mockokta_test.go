@@ -233,9 +233,4 @@ func RandStringRunes(n int) string {
 	return string(b)
 }
 
-func RandAdminRoleRequest() okta.AssignRoleRequest {
-	rand.Seed(time.Now().UnixNano())
-    roleRequest := NewAssignRoleRequest(ADMIN_ROLES[rand.Intn(len(ADMIN_ROLES))])
-	return roleRequest
-}
 
