@@ -50,6 +50,10 @@ func (client *MockClient) CreateGroup(ctx context.Context, group okta.Group) (*o
     return client.Group.CreateGroup(ctx, group)
 }
 
+func (client *MockClient) AssignRoleToGroup(ctx context.Context, groupId string, assignRoleRequest okta.AssignRoleRequest, qp *query.Params) (*okta.Role, *okta.Response, error) {
+    return client.Group.AssignRoleToGroup(ctx, groupId, assignRoleRequest)
+}
+
 func (g *GroupResource) CreateGroup(ctx context.Context, group okta.Group) (*okta.Group, *okta.Response, error) {
 
 	group.Id = fmt.Sprint(len(g.Groups)+1)
