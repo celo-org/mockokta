@@ -7,7 +7,6 @@ import (
 	"testing"
 	"time"
 
-//	"github.com/okta/okta-sdk-golang/v2/okta/query"
 	"github.com/okta/okta-sdk-golang/v2/okta"
 	"github.com/stretchr/testify/assert"
 )
