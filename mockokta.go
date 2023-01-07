@@ -39,7 +39,7 @@ type GroupResource struct {
 // Wrapper methods for Google Clouds API
 
 func (client *MockClient) ListGroups(ctx context.Context, qp *query.Params) ([]*okta.Group, *okta.Response, error) {
-    return client.c.Group.ListGroups(ctx, qp)
+    return client.Group.ListGroups(ctx, qp)
 }
 
 
