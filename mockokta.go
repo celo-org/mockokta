@@ -162,6 +162,16 @@ func (g *GroupResource) GetGroupById(groupId string) (*okta.Group, error) {
 	return nil, fmt.Errorf("group not found")
 }
 
+func (g *GroupResource) GetGroupByName(groupName string) (*okta.Group, error) {
+	for _, group := range g.Groups {
+		if group.Name == groupName {
+			return group, nil
+		}
+	}
+	return nil, fmt.Errorf("group not found")
+}
+
+
 type UserResource struct {
 	Client *MockClient
 	Users  []*okta.User
