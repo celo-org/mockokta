@@ -84,7 +84,7 @@ func TestGroupResource_AssignRoleToGroup(t *testing.T) {
 	t.Run("should not assign role with invalid name to group", func(t *testing.T) {
 		groupNameArg := "TestGroup"
 		roleArg := "Invalid_Role"
-        roleRequest := NewAssignRoleRequest(roleArg)
+		roleRequest := NewAssignRoleRequest(roleArg)
 
 		client := NewClient()
 		group, _, _ := client.Group.CreateGroup(context.TODO(), *NewGroup(groupNameArg))
@@ -97,8 +97,8 @@ func TestGroupResource_AssignRoleToGroup(t *testing.T) {
 	})
 
 	t.Run("should return error if group doesn't exist", func(t *testing.T) {
-        groupNameArg := "NonexistentGroup"
-       
+		groupNameArg := "NonexistentGroup"
+
 		client := NewClient()
 		roleRequest := RandAdminRoleRequest()
 
@@ -130,11 +130,11 @@ func TestGroupResource_AssignRoleToGroup(t *testing.T) {
 		group, _, _ := client.Group.CreateGroup(context.TODO(), *NewGroup(groupNameArg))
 		client.Group.AssignRoleToGroup(context.TODO(), group.Id, roleRequest, nil)
 
-        got := client.Group.GroupContainsRole(*group, roleRequest.Type)
+		got := client.Group.GroupContainsRole(*group, roleRequest.Type)
 
-        if got != true {
-            t.Errorf("expected group %+v to contain role %v but was not found", client.Group, roleRequest.Type)
-        }
+		if got != true {
+			t.Errorf("expected group %+v to contain role %v but was not found", client.Group, roleRequest.Type)
+		}
 	})
 }
 
@@ -144,8 +144,8 @@ func TestGroupResource_ListGroupAssignedRoles(t *testing.T) {
 		roleRequest := RandAdminRoleRequest()
 
 		client := NewClient()
-	    _, _, err := client.Group.AssignRoleToGroup(context.TODO(), groupIdArg, roleRequest, nil)
-       
+		_, _, err := client.Group.AssignRoleToGroup(context.TODO(), groupIdArg, roleRequest, nil)
+
 		if err == nil {
 			t.Errorf("Expected err, but didn't get one")
 		}
@@ -156,69 +156,68 @@ func TestGroupResource_ListGroupAssignedRoles(t *testing.T) {
 		groupNameArg := "TestGroup"
 
 		roleTypeArg1 := "SUPER_ADMIN"
-        roleTypeArg2 := "GROUP_ADMIN"
+		roleTypeArg2 := "GROUP_ADMIN"
 
-        roleRequest1 := NewAssignRoleRequest(roleTypeArg1)
-        roleRequest2 := NewAssignRoleRequest(roleTypeArg2)
-       
+		roleRequest1 := NewAssignRoleRequest(roleTypeArg1)
+		roleRequest2 := NewAssignRoleRequest(roleTypeArg2)
+
 		client := NewClient()
 		group, _, _ := client.Group.CreateGroup(context.TODO(), *NewGroup(groupNameArg))
 
-		role1, _, _ :=  client.Group.AssignRoleToGroup(context.TODO(), group.Id, roleRequest1, nil)
+		role1, _, _ := client.Group.AssignRoleToGroup(context.TODO(), group.Id, roleRequest1, nil)
 		role2, _, _ := client.Group.AssignRoleToGroup(context.TODO(), group.Id, roleRequest2, nil)
-       
-        want := []*okta.Role{role1, role2}
-        got, _, _ := client.Group.ListGroupAssignedRoles(context.TODO(), group.Id, nil)
 
-        if !reflect.DeepEqual(got, want) {
-            t.Errorf("expected roles %v to match %v", got, want)
-        }
+		want := []*okta.Role{role1, role2}
+		got, _, _ := client.Group.ListGroupAssignedRoles(context.TODO(), group.Id, nil)
+
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("expected roles %v to match %v", got, want)
+		}
 	})
 }
 
 func TestUserResource_CreateUser(t *testing.T) {
-    t.Run("should err if user exists", func(t *testing.T) {
-        userEmail := "TestUser@test.com"
+	t.Run("should err if user exists", func(t *testing.T) {
+		userEmail := "TestUser@test.com"
 
-        client := NewClient()
+		client := NewClient()
 
-        client.User.CreateUser(userEmail)
-        _, err := client.User.CreateUser(userEmail)
+		client.User.CreateUser(userEmail)
+		_, err := client.User.CreateUser(userEmail)
 
- 		if err == nil {
+		if err == nil {
 			t.Errorf("expected error but didn't get one")
 		}
-    })
+	})
 
-    t.Run("should create user", func(t *testing.T) {
-        userEmail := "TestUser@test.com"
+	t.Run("should create user", func(t *testing.T) {
+		userEmail := "TestUser@test.com"
 
-        client := NewClient()
+		client := NewClient()
 
-        want, _ := client.User.CreateUser(userEmail)
-        got, _ := client.User.GetUserByEmail(context.TODO(), userEmail)
-        
-        if !reflect.DeepEqual(got, want) {
-            t.Errorf("got %v want %v", got, want)
-        }
-    })
+		want, _ := client.User.CreateUser(userEmail)
+		got, _ := client.User.GetUserByEmail(context.TODO(), userEmail)
+
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("got %v want %v", got, want)
+		}
+	})
 }
 
 func TestUserResource_ListUsers(t *testing.T) {
-    client := NewClient()
-    userEmailArg1 := "TestUser1"
-    userEmailArg2 := "TestUser2"
+	client := NewClient()
+	userEmailArg1 := "TestUser1"
+	userEmailArg2 := "TestUser2"
 
-    user1, _ := client.User.CreateUser(userEmailArg1)
-    user2, _ := client.User.CreateUser(userEmailArg2)
+	user1, _ := client.User.CreateUser(userEmailArg1)
+	user2, _ := client.User.CreateUser(userEmailArg2)
 
-    want := []*okta.User{user1, user2}
-    got, _, _ := client.User.ListUsers(context.TODO(), nil)
+	want := []*okta.User{user1, user2}
+	got, _, _ := client.User.ListUsers(context.TODO(), nil)
 
-    
-    if !reflect.DeepEqual(got, want) {
-        t.Errorf("got %v want %v", got, want)
-    }
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("got %v want %v", got, want)
+	}
 }
 
 var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
@@ -231,5 +230,3 @@ func RandStringRunes(n int) string {
 	}
 	return string(b)
 }
-
-

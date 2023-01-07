@@ -3,8 +3,8 @@ package mockokta
 import (
 	"context"
 	"fmt"
-    "math/rand"
-    "time"
+	"math/rand"
+	"time"
 
 	"github.com/okta/okta-sdk-golang/v2/okta"
 	"github.com/okta/okta-sdk-golang/v2/okta/query"
@@ -19,10 +19,10 @@ type MockClient struct {
 }
 
 func NewClient() *MockClient {
-    c := &MockClient{}
+	c := &MockClient{}
 	c.Group = &GroupResource{
-		Client: c,
-        GroupRoles: make(map[string][]*okta.Role),
+		Client:     c,
+		GroupRoles: make(map[string][]*okta.Role),
 	}
 	c.User = &UserResource{
 		Client: c,
@@ -39,29 +39,32 @@ type GroupResource struct {
 
 // Wrapper methods for Okta API Calls
 func (client *MockClient) ListGroups(ctx context.Context, qp *query.Params) ([]*okta.Group, *okta.Response, error) {
-    return client.Group.ListGroups(ctx, qp)
+	return client.Group.ListGroups(ctx, qp)
 }
 
-func (client *MockClient) ListGroupAssignedRoles(ctx context.Context, groupId string,  qp *query.Params) ([]*okta.Role, *okta.Response, error) {
-    return client.Group.ListGroupAssignedRoles(ctx, groupId, qp)
+func (client *MockClient) ListGroupAssignedRoles(ctx context.Context, groupId string, qp *query.Params) ([]*okta.Role, *okta.Response, error) {
+	return client.Group.ListGroupAssignedRoles(ctx, groupId, qp)
 }
 
 func (client *MockClient) CreateGroup(ctx context.Context, group okta.Group) (*okta.Group, *okta.Response, error) {
-    return client.Group.CreateGroup(ctx, group)
+	return client.Group.CreateGroup(ctx, group)
 }
 
 func (client *MockClient) AssignRoleToGroup(ctx context.Context, groupId string, assignRoleRequest okta.AssignRoleRequest, qp *query.Params) (*okta.Role, *okta.Response, error) {
-    return client.Group.AssignRoleToGroup(ctx, groupId, assignRoleRequest, qp)
+	return client.Group.AssignRoleToGroup(ctx, groupId, assignRoleRequest, qp)
 }
 
 func (client *MockClient) ListUsers(ctx context.Context, qp *query.Params) ([]*okta.User, *okta.Response, error) {
 	return client.User.ListUsers(ctx, qp)
 }
 
+func (client *MockClient) AddUserToGroup(ctx context.Context, groupId string, userId string) (*okta.Response, error) {
+    return client.Group.AddUserToGroup
+}
 
 func (g *GroupResource) CreateGroup(ctx context.Context, group okta.Group) (*okta.Group, *okta.Response, error) {
 
-	group.Id = fmt.Sprint(len(g.Groups)+1)
+	group.Id = fmt.Sprint(len(g.Groups) + 1)
 	for _, x := range g.Groups {
 
 		if x.Profile.Name == group.Profile.Name {
@@ -89,24 +92,23 @@ func NewGroup(groupName string) *okta.Group {
 	}
 }
 
-/*
-	func (g *GroupResource) AddUserToGroup(ctx context.Context, groupId string, userId string) (*okta.Response, error) {
-		g.GroupUsers[groupId] = append(g.GroupUsers[groupId], userId)
-		return nil, nil
-	}
-*/
+func (g *GroupResource) AddUserToGroup(ctx context.Context, groupId string, userId string) (*okta.Response, error) {
+	g.GroupUsers[groupId] = append(g.GroupUsers[groupId], userId)
+	return nil, nil
+}
+
 func (g *GroupResource) AssignRoleToGroup(ctx context.Context, groupId string, assignRoleRequest okta.AssignRoleRequest, qp *query.Params) (*okta.Role, *okta.Response, error) {
 	if !SliceContainsString(ADMIN_ROLES, assignRoleRequest.Type) {
 		return nil, nil, fmt.Errorf("invalid role")
 	}
-    group, err := g.GetGroupById(groupId)
-    if err != nil {
-        return nil, nil, err
-    }
+	group, err := g.GetGroupById(groupId)
+	if err != nil {
+		return nil, nil, err
+	}
 
-    if g.GroupContainsRole(*group, assignRoleRequest.Type) {
-        return nil, nil, fmt.Errorf("group role exists")
-    }
+	if g.GroupContainsRole(*group, assignRoleRequest.Type) {
+		return nil, nil, fmt.Errorf("group role exists")
+	}
 
 	role := NewRole(assignRoleRequest.Type)
 	role.Id = fmt.Sprintf("%v", len(g.GroupRoles)+1)
@@ -115,17 +117,17 @@ func (g *GroupResource) AssignRoleToGroup(ctx context.Context, groupId string, a
 }
 
 func (g *GroupResource) ListGroupAssignedRoles(ctx context.Context, groupId string, qp *query.Params) ([]*okta.Role, *okta.Response, error) {
-        group, err := g.GetGroupById(groupId)
-        if err != nil {
-            return nil, nil, err
-        }
+	group, err := g.GetGroupById(groupId)
+	if err != nil {
+		return nil, nil, err
+	}
 
-		return g.GroupRoles[group.Profile.Name], nil, nil
+	return g.GroupRoles[group.Profile.Name], nil, nil
 }
 
 func (g *GroupResource) GroupContainsRole(group okta.Group, roleType string) bool {
 	for _, groupRole := range g.GroupRoles[group.Profile.Name] {
-        
+
 		if groupRole.Type == roleType {
 			return true
 		}
@@ -134,12 +136,12 @@ func (g *GroupResource) GroupContainsRole(group okta.Group, roleType string) boo
 }
 
 func (g *GroupResource) GetGroupById(groupId string) (*okta.Group, error) {
-    for _, group := range  g.Groups {
-        if group.Id == groupId {
-            return group, nil
-        }
-    }
-    return nil, fmt.Errorf("group not found")
+	for _, group := range g.Groups {
+		if group.Id == groupId {
+			return group, nil
+		}
+	}
+	return nil, fmt.Errorf("group not found")
 }
 
 type UserResource struct {
@@ -148,36 +150,36 @@ type UserResource struct {
 }
 
 func (u *UserResource) CreateUser(userEmail string) (*okta.User, error) {
-    userId := fmt.Sprint(len(u.Users) + 1)
+	userId := fmt.Sprint(len(u.Users) + 1)
 
-    for _, u := range u.Users {
-        if (*u.Profile)["email"] == userEmail {
-            return nil, fmt.Errorf("user exists")
-        }
-    }
+	for _, u := range u.Users {
+		if (*u.Profile)["email"] == userEmail {
+			return nil, fmt.Errorf("user exists")
+		}
+	}
 
-    user := &okta.User{
-        Id: userId,
-        Profile: &okta.UserProfile{
-            "email": userEmail,
-        },
-    }
+	user := &okta.User{
+		Id: userId,
+		Profile: &okta.UserProfile{
+			"email": userEmail,
+		},
+	}
 
-    u.Users = append(u.Users, user)
-    return user, nil
-}  
+	u.Users = append(u.Users, user)
+	return user, nil
+}
 
 func (u *UserResource) ListUsers(ctx context.Context, qp *query.Params) ([]*okta.User, *okta.Response, error) {
 	return u.Users, nil, nil
 }
 
 func (u *UserResource) GetUserByEmail(ctx context.Context, email string) (*okta.User, error) {
-    for _, user := range u.Users {
-        if (*user.Profile)["email"] == email {
-            return user, nil
-        }
-    }
-    return nil, fmt.Errorf("user not found")
+	for _, user := range u.Users {
+		if (*user.Profile)["email"] == email {
+			return user, nil
+		}
+	}
+	return nil, fmt.Errorf("user not found")
 }
 
 func NewRole(roleType string) okta.Role {
@@ -192,7 +194,6 @@ func NewAssignRoleRequest(roleType string) okta.AssignRoleRequest {
 	}
 }
 
-
 func SliceContainsString(slice []string, str string) bool {
 	for _, s := range slice {
 		if s == str {
@@ -204,7 +205,6 @@ func SliceContainsString(slice []string, str string) bool {
 
 func RandAdminRoleRequest() okta.AssignRoleRequest {
 	rand.Seed(time.Now().UnixNano())
-    roleRequest := NewAssignRoleRequest(ADMIN_ROLES[rand.Intn(len(ADMIN_ROLES))])
+	roleRequest := NewAssignRoleRequest(ADMIN_ROLES[rand.Intn(len(ADMIN_ROLES))])
 	return roleRequest
 }
-
