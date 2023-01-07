@@ -63,6 +63,10 @@ func (client *MockClient) AddUserToGroup(ctx context.Context, groupId string, us
 	return client.Group.AddUserToGroup(ctx, groupId, userId)
 }
 
+func (client *MockClient) RemoveUserFromGroup(ctx context.Context, groupId string, userId string) (*okta.Response, error) {
+	return client.Group.RemoveUserFromGroup(ctx, groupId, userId)
+}
+
 func (g *GroupResource) CreateGroup(ctx context.Context, group okta.Group) (*okta.Group, *okta.Response, error) {
 
 	group.Id = fmt.Sprint(len(g.Groups) + 1)
@@ -102,9 +106,34 @@ func (g *GroupResource) AddUserToGroup(ctx context.Context, groupId string, user
 	if err != nil {
 		return nil, err
 	}
-	g.GroupUsers[group.Profile.Name] = append(g.GroupUsers[group.Profile.Name], (*user.Profile)["email"].(string))
+
+    g.GroupUsers[group.Profile.Name] = append(g.GroupUsers[group.Profile.Name], (*user.Profile)["email"].(string))
+
 	return nil, nil
 }
+
+func (g *GroupResource) RemoveUserFromGroup(ctx context.Context, groupId string, userId string) (*okta.Response, error) {
+    group, err := g.GetGroupById(groupId)
+	if err != nil {
+		return nil, err
+	}
+    groupName := group.Profile.Name
+	user, err := g.Client.User.GetUserById(userId)
+	if err != nil {
+		return nil, err
+	}
+    userEmail := (*user.Profile)["email"].(string)
+
+    for idx, u := range g.GroupUsers[groupName] {
+        if u == userEmail {
+            g.GroupUsers[groupName][idx] = g.GroupUsers[groupName][len(g.GroupUsers[groupName])-1]
+            g.GroupUsers[groupName][len(g.GroupUsers[groupName])-1] = ""
+            g.GroupUsers[groupName] = g.GroupUsers[groupName][:len(g.GroupUsers[groupName])-1]
+        }
+    }
+    return nil, nil
+}
+
 
 func (g *GroupResource) AssignRoleToGroup(ctx context.Context, groupId string, assignRoleRequest okta.AssignRoleRequest, qp *query.Params) (*okta.Role, *okta.Response, error) {
 	if !SliceContainsString(ADMIN_ROLES, assignRoleRequest.Type) {
