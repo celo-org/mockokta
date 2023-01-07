@@ -36,16 +36,18 @@ type GroupResource struct {
 	GroupUsers map[string][]string
 }
 
-// Wrapper methods for Google Clouds API
-
+// Wrapper methods for Okta API Calls
 func (client *MockClient) ListGroups(ctx context.Context, qp *query.Params) ([]*okta.Group, *okta.Response, error) {
     return client.Group.ListGroups(ctx, qp)
+}
+
+func (client *MockClient) ListGroupAssignedRoles(ctx context.Context, groupId string,  qp *query.Params) ([]*okta.Role, *okta.Response, error) {
+    return client.Group.ListGroupAssignedRoles(ctx, groupId, qp)
 }
 
 func (client *MockClient) CreateGroup(ctx context.Context, group okta.Group) (*okta.Group, *okta.Response, error) {
     return client.Group.CreateGroup(ctx, group)
 }
-
 
 func (g *GroupResource) CreateGroup(ctx context.Context, group okta.Group) (*okta.Group, *okta.Response, error) {
 
