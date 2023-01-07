@@ -16,14 +16,10 @@ type MockClient struct {
 	Group *GroupResource
 	User  *UserResource
 }
-func NewClient() *GCPClient {
-	service, _ := NewService(context.TODO())
-	return &GCPClient{Service: service}
-}
 
 func NewClient() *MockClient {
-	ctx, client, err := okta.NewClient(context.TODO())
 
+    c := &MockClient{}
 	c.Group = &GroupResource{
 		Client: c,
         GroupRoles: make(map[string][]*okta.Role),
@@ -149,11 +145,11 @@ func (u *UserResource) CreateUser(userEmail string) (*okta.User, error) {
     return user, nil
 }  
 
-func (u *UserResource) ListUsers(context.Context, *query.Params) ([]*okta.User, *okta.Response, error) {
+func (u *UserResource) ListUsers(ctx context.Context, qp *query.Params) ([]*okta.User, *okta.Response, error) {
 	return u.Users, nil, nil
 }
 
-func (u *UserResource) GetUserByEmail(context.Context, email string) (*okta.User, error) {
+func (u *UserResource) GetUserByEmail(ctx context.Context, email string) (*okta.User, error) {
     for _, user := range u.Users {
         if (*user.Profile)["email"] == email {
             return user, nil
