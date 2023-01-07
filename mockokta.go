@@ -164,7 +164,7 @@ func (g *GroupResource) GetGroupById(groupId string) (*okta.Group, error) {
 
 func (g *GroupResource) GetGroupByName(groupName string) (*okta.Group, error) {
 	for _, group := range g.Groups {
-		if group.Name == groupName {
+		if group.Profile.Name == groupName {
 			return group, nil
 		}
 	}
