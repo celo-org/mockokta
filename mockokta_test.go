@@ -197,7 +197,7 @@ func TestUserResource_CreateUser(t *testing.T) {
         client := NewClient()
 
         want, _ := client.User.CreateUser(userEmail)
-        got, _ := client.User.GetUserByEmail(userEmail)
+        got, _ := client.User.GetUserByEmail(context.TODO(), userEmail)
         
         if !reflect.DeepEqual(got, want) {
             t.Errorf("got %v want %v", got, want)
