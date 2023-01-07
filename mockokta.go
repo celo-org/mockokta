@@ -59,7 +59,7 @@ func (client *MockClient) ListUsers(ctx context.Context, qp *query.Params) ([]*o
 }
 
 func (client *MockClient) AddUserToGroup(ctx context.Context, groupId string, userId string) (*okta.Response, error) {
-    return client.Group.AddUserToGroup
+    return client.Group.AddUserToGroup(ctx, groupId, userId)
 }
 
 func (g *GroupResource) CreateGroup(ctx context.Context, group okta.Group) (*okta.Group, *okta.Response, error) {
