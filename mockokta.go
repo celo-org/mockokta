@@ -18,7 +18,6 @@ type MockClient struct {
 }
 
 func NewClient() *MockClient {
-
     c := &MockClient{}
 	c.Group = &GroupResource{
 		Client: c,
@@ -36,6 +35,13 @@ type GroupResource struct {
 	GroupRoles map[string][]*okta.Role
 	GroupUsers map[string][]string
 }
+
+// Wrapper methods for Google Clouds API
+
+func (client *MockClient) ListGroups(ctx context.Context, qp *query.Params) ([]*okta.Group, *okta.Response, error) {
+    return client.c.Group.ListGroups(ctx, qp)
+}
+
 
 func (g *GroupResource) CreateGroup(ctx context.Context, group okta.Group) (*okta.Group, *okta.Response, error) {
 
