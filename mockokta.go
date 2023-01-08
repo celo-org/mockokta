@@ -23,7 +23,7 @@ func NewClient() *MockClient {
 	c.Group = &GroupResource{
 		Client:     c,
 		GroupRoles: make(map[string][]*okta.Role),
-        GroupUsers: make(map[string][]string),
+		GroupUsers: make(map[string][]string),
 	}
 	c.User = &UserResource{
 		Client: c,
@@ -111,33 +111,32 @@ func (g *GroupResource) AddUserToGroup(ctx context.Context, groupId string, user
 		return nil, err
 	}
 
-    g.GroupUsers[group.Profile.Name] = append(g.GroupUsers[group.Profile.Name], (*user.Profile)["email"].(string))
+	g.GroupUsers[group.Profile.Name] = append(g.GroupUsers[group.Profile.Name], (*user.Profile)["email"].(string))
 
 	return nil, nil
 }
 
 func (g *GroupResource) RemoveUserFromGroup(ctx context.Context, groupId string, userId string) (*okta.Response, error) {
-    group, err := g.GetGroupById(groupId)
+	group, err := g.GetGroupById(groupId)
 	if err != nil {
 		return nil, err
 	}
-    groupName := group.Profile.Name
+	groupName := group.Profile.Name
 	user, err := g.Client.User.GetUserById(userId)
 	if err != nil {
 		return nil, err
 	}
-    userEmail := (*user.Profile)["email"].(string)
+	userEmail := (*user.Profile)["email"].(string)
 
-    for idx, u := range g.GroupUsers[groupName] {
-        if u == userEmail {
-            g.GroupUsers[groupName][idx] = g.GroupUsers[groupName][len(g.GroupUsers[groupName])-1]
-            g.GroupUsers[groupName][len(g.GroupUsers[groupName])-1] = ""
-            g.GroupUsers[groupName] = g.GroupUsers[groupName][:len(g.GroupUsers[groupName])-1]
-        }
-    }
-    return nil, nil
+	for idx, u := range g.GroupUsers[groupName] {
+		if u == userEmail {
+			g.GroupUsers[groupName][idx] = g.GroupUsers[groupName][len(g.GroupUsers[groupName])-1]
+			g.GroupUsers[groupName][len(g.GroupUsers[groupName])-1] = ""
+			g.GroupUsers[groupName] = g.GroupUsers[groupName][:len(g.GroupUsers[groupName])-1]
+		}
+	}
+	return nil, nil
 }
-
 
 func (g *GroupResource) AssignRoleToGroup(ctx context.Context, groupId string, assignRoleRequest okta.AssignRoleRequest, qp *query.Params) (*okta.Role, *okta.Response, error) {
 	if !SliceContainsString(ADMIN_ROLES, assignRoleRequest.Type) {
@@ -178,21 +177,21 @@ func (g *GroupResource) GroupContainsRole(group okta.Group, roleType string) boo
 }
 
 func (g *GroupResource) ListGroupUsers(ctx context.Context, groupId string, qp *query.Params) ([]*okta.User, *okta.Response, error) {
-    group, err := g.GetGroupById(groupId)
-    if err != nil {
-        return nil, nil, err
-    } 
-    var users []*okta.User
-	for _, user := range g.GroupUsers[group.Profile.Name]  {
-        user, _ := g.Client.User.GetUserByEmail(user)
-        users = append(users, user)
-    }
-    return users, nil, nil
+	group, err := g.GetGroupById(groupId)
+	if err != nil {
+		return nil, nil, err
+	}
+	var users []*okta.User
+	for _, user := range g.GroupUsers[group.Profile.Name] {
+		user, _ := g.Client.User.GetUserByEmail(user)
+		users = append(users, user)
+	}
+	return users, nil, nil
 }
 
 func (g *GroupResource) GroupContainsUser(group okta.Group, userEmail string) bool {
 	for _, groupUser := range g.GroupUsers[group.Profile.Name] {
-        if groupUser == userEmail {
+		if groupUser == userEmail {
 			return true
 		}
 	}
@@ -216,7 +215,6 @@ func (g *GroupResource) GetGroupByName(groupName string) (*okta.Group, error) {
 	}
 	return nil, fmt.Errorf("group not found")
 }
-
 
 type UserResource struct {
 	Client *MockClient

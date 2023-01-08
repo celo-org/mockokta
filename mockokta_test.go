@@ -5,7 +5,6 @@ import (
 	"math/rand"
 	"reflect"
 	"testing"
-    "log"
 	"time"
 
 	"github.com/okta/okta-sdk-golang/v2/okta"
@@ -232,16 +231,16 @@ func TestGroupResource_AddUserToGroup(t *testing.T) {
 	})
 
 	t.Run("should add user to group", func(t *testing.T) {
-        userEmailArg := "TestUser@test.com"
+		userEmailArg := "TestUser@test.com"
 		groupNameArg := "TestGroup"
 
 		client := NewClient()
 		group, _, _ := client.Group.CreateGroup(context.TODO(), *NewGroup(groupNameArg))
-        user, _ := client.User.CreateUser(userEmailArg)
+		user, _ := client.User.CreateUser(userEmailArg)
 
 		client.Group.AddUserToGroup(context.TODO(), group.Id, user.Id)
 
-        if !client.Group.GroupContainsUser(*group, userEmailArg) {
+		if !client.Group.GroupContainsUser(*group, userEmailArg) {
 			t.Errorf("expected group %v to contain user %v but it did not", groupNameArg, userEmailArg)
 		}
 	})
@@ -273,32 +272,32 @@ func TestGroupResource_RemoveUserFromGroup(t *testing.T) {
 	})
 
 	t.Run("should remove user from group", func(t *testing.T) {
-        userEmailArg := "TestUser@test.com"
+		userEmailArg := "TestUser@test.com"
 		groupNameArg := "TestGroup"
 
 		client := NewClient()
 		group, _, _ := client.Group.CreateGroup(context.TODO(), *NewGroup(groupNameArg))
-        user, _ := client.User.CreateUser(userEmailArg)
+		user, _ := client.User.CreateUser(userEmailArg)
 		client.Group.AddUserToGroup(context.TODO(), group.Id, user.Id)
 
 		client.Group.RemoveUserFromGroup(context.TODO(), group.Id, user.Id)
 
-        if client.Group.GroupContainsUser(*group, userEmailArg) {
+		if client.Group.GroupContainsUser(*group, userEmailArg) {
 			t.Errorf("expected group %v to not contain user %v", groupNameArg, userEmailArg)
 		}
 	})
 	t.Run("should not remove other users", func(t *testing.T) {
-        userEmailArg1 := "TestUser1@test.com"
-        userEmailArg2 := "TestUser2@test.com"
-        userEmailArg3 := "TestUser3@test.com"
+		userEmailArg1 := "TestUser1@test.com"
+		userEmailArg2 := "TestUser2@test.com"
+		userEmailArg3 := "TestUser3@test.com"
 
 		groupNameArg := "TestGroup"
 
 		client := NewClient()
 		group, _, _ := client.Group.CreateGroup(context.TODO(), *NewGroup(groupNameArg))
-        user1, _ := client.User.CreateUser(userEmailArg1)
-        user2, _ := client.User.CreateUser(userEmailArg2)
-        user3, _ := client.User.CreateUser(userEmailArg3)
+		user1, _ := client.User.CreateUser(userEmailArg1)
+		user2, _ := client.User.CreateUser(userEmailArg2)
+		user3, _ := client.User.CreateUser(userEmailArg3)
 
 		client.Group.AddUserToGroup(context.TODO(), group.Id, user1.Id)
 		client.Group.AddUserToGroup(context.TODO(), group.Id, user2.Id)
@@ -306,13 +305,38 @@ func TestGroupResource_RemoveUserFromGroup(t *testing.T) {
 
 		client.Group.RemoveUserFromGroup(context.TODO(), group.Id, user2.Id)
 
-        want := 2
-        got := len(client.Group.GroupUsers[group.Profile.Name]) 
+		want := 2
+		got := len(client.Group.GroupUsers[group.Profile.Name])
 
-        if got != want {
+		if got != want {
 			t.Errorf("expected group %v to have %d users but found %d", groupNameArg, want, got)
 		}
 	})
+}
+
+func TestGroupResource_ListGroupUsers(t *testing.T) {
+	userEmailArg1 := "TestUser1@test.com"
+	userEmailArg2 := "TestUser2@test.com"
+	userEmailArg3 := "TestUser3@test.com"
+
+	groupNameArg := "TestGroup"
+
+	client := NewClient()
+	group, _, _ := client.Group.CreateGroup(context.TODO(), *NewGroup(groupNameArg))
+	user1, _ := client.User.CreateUser(userEmailArg1)
+	user2, _ := client.User.CreateUser(userEmailArg2)
+	user3, _ := client.User.CreateUser(userEmailArg3)
+
+	client.Group.AddUserToGroup(context.TODO(), group.Id, user1.Id)
+	client.Group.AddUserToGroup(context.TODO(), group.Id, user2.Id)
+	client.Group.AddUserToGroup(context.TODO(), group.Id, user3.Id)
+
+	want := []*okta.User{user1, user2, user3}
+	got, _, _ := client.Group.ListGroupUsers(context.TODO(), group.Id, nil)
+
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("got %v want %v", got, want)
+	}
 }
 
 func TestUserResource_ListUsers(t *testing.T) {
