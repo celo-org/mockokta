@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"reflect"
 	"testing"
+    "log"
 	"time"
 
 	"github.com/okta/okta-sdk-golang/v2/okta"
@@ -267,7 +268,7 @@ func TestGroupResource_RemoveUserFromGroup(t *testing.T) {
 		_, err := client.Group.RemoveUserFromGroup(context.TODO(), group.Id, "1")
 
 		if err == nil {
-			t.Errorf("expected error but didn't get one %v", err)
+			t.Errorf("expected error but didn't get one")
 		}
 	})
 
@@ -278,6 +279,7 @@ func TestGroupResource_RemoveUserFromGroup(t *testing.T) {
 		client := NewClient()
 		group, _, _ := client.Group.CreateGroup(context.TODO(), *NewGroup(groupNameArg))
         user, _ := client.User.CreateUser(userEmailArg)
+		client.Group.AddUserToGroup(context.TODO(), group.Id, user.Id)
 
 		client.Group.RemoveUserFromGroup(context.TODO(), group.Id, user.Id)
 
@@ -311,7 +313,6 @@ func TestGroupResource_RemoveUserFromGroup(t *testing.T) {
 			t.Errorf("expected group %v to have %d users but found %d", groupNameArg, want, got)
 		}
 	})
-
 }
 
 func TestUserResource_ListUsers(t *testing.T) {

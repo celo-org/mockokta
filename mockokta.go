@@ -43,6 +43,10 @@ func (client *MockClient) ListGroups(ctx context.Context, qp *query.Params) ([]*
 	return client.Group.ListGroups(ctx, qp)
 }
 
+func (client *MockClient) ListGroupUsers(ctx context.Context, groupId string, qp *query.Params) ([]*okta.User, *okta.Response, error) {
+	return client.Group.ListGroupUsers(ctx, groupId, qp)
+}
+
 func (client *MockClient) ListGroupAssignedRoles(ctx context.Context, groupId string, qp *query.Params) ([]*okta.Role, *okta.Response, error) {
 	return client.Group.ListGroupAssignedRoles(ctx, groupId, qp)
 }
@@ -171,6 +175,19 @@ func (g *GroupResource) GroupContainsRole(group okta.Group, roleType string) boo
 		}
 	}
 	return false
+}
+
+func (g *GroupResource) ListGroupUsers(ctx context.Context, groupId string, qp *query.Params) ([]*okta.User, *okta.Response, error) {
+    group, err := g.GetGroupById(groupId)
+    if err != nil {
+        return nil, nil, err
+    } 
+    var users []*okta.User
+	for _, user := range g.GroupUsers[group.Profile.Name]  {
+        user, _ := g.Client.User.GetUserByEmail(user)
+        users = append(users, user)
+    }
+    return users, nil, nil
 }
 
 func (g *GroupResource) GroupContainsUser(group okta.Group, userEmail string) bool {
