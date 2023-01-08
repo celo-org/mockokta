@@ -320,7 +320,7 @@ func TestGroupResource_DeleteGroup(t *testing.T) {
 
 		client := NewClient()
 
-		err := client.Group.DeleteGroup(context.TODO(), groupIdArg)
+		_, err := client.Group.DeleteGroup(context.TODO(), groupIdArg)
 
 		if err == nil {
 			t.Errorf("expected error but didn't get one")

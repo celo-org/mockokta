@@ -55,7 +55,7 @@ func (client *MockClient) CreateGroup(ctx context.Context, group okta.Group) (*o
 	return client.Group.CreateGroup(ctx, group)
 }
 
-func (client *MockClient) DeleteGroup(ctx context.Context, groupId string) error {
+func (client *MockClient) DeleteGroup(ctx context.Context, groupId string) (*okta.Response,  error) {
 	return client.Group.DeleteGroup(ctx, groupId)
 }
 
@@ -75,17 +75,17 @@ func (client *MockClient) RemoveUserFromGroup(ctx context.Context, groupId strin
 	return client.Group.RemoveUserFromGroup(ctx, groupId, userId)
 }
 
-func (g *GroupResource) DeleteGroup(ctx context.Context, groupId string) error {
+func (g *GroupResource) DeleteGroup(ctx context.Context, groupId string) (*okta.Response, error) {
 	for idx, group := range g.Groups {
 		if group.Id == groupId {
 			g.Groups[idx] = g.Groups[len(g.Groups)-1]
 			g.Groups[len(g.Groups)-1] = &okta.Group{}
 			g.Groups = g.Groups[:len(g.Groups)-1]
-			return nil
+			return nil, nil
 		}
 	}
 
-	return fmt.Errorf("group not found")
+	return nil, fmt.Errorf("group not found")
 }
 
 func (g *GroupResource) CreateGroup(ctx context.Context, group okta.Group) (*okta.Group, *okta.Response, error) {
