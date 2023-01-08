@@ -314,6 +314,57 @@ func TestGroupResource_RemoveUserFromGroup(t *testing.T) {
 	})
 }
 
+func TestGroupResource_DeleteGroup(t *testing.T) {
+	t.Run("should err if group doesn't exist", func(t *testing.T) {
+		groupIdArg := "NonExistentId"
+
+		client := NewClient()
+
+		err := client.Group.DeleteGroup(context.TODO(), groupIdArg)
+
+		if err == nil {
+			t.Errorf("expected error but didn't get one")
+		}
+	})
+	t.Run("should delete group", func(t *testing.T) {
+		groupNameArg := "TestGroup"
+
+		client := NewClient()
+		group, _, _ := client.Group.CreateGroup(context.TODO(), *NewGroup(groupNameArg))
+
+		client.Group.DeleteGroup(context.TODO(), group.Id)
+
+        want := []*okta.Group{}
+    	got, _, _ := client.Group.ListGroups(context.TODO(), nil)
+
+        if !reflect.DeepEqual(got, want) { 
+            t.Errorf("got %v want %v", got, want)
+        }
+        
+	})
+	t.Run("should not delete extra groups", func(t *testing.T) {
+		groupNameArg1 := "TestGroup1"
+        groupNameArg2 := "TestGroup2"
+        groupNameArg3 := "TestGroup3"
+
+		client := NewClient()
+		group1, _, _ := client.Group.CreateGroup(context.TODO(), *NewGroup(groupNameArg1))
+		group2, _, _ := client.Group.CreateGroup(context.TODO(), *NewGroup(groupNameArg2))
+		group3, _, _ := client.Group.CreateGroup(context.TODO(), *NewGroup(groupNameArg3))
+
+		client.Group.DeleteGroup(context.TODO(), group2.Id)
+
+        want := []*okta.Group{group1, group3}
+    	got, _, _ := client.Group.ListGroups(context.TODO(), nil)
+
+        if !reflect.DeepEqual(got, want) { 
+            t.Errorf("got %v want %v", got, want)
+        }
+        
+	})
+
+}
+
 func TestGroupResource_ListGroupUsers(t *testing.T) {
 	userEmailArg1 := "TestUser1@test.com"
 	userEmailArg2 := "TestUser2@test.com"
