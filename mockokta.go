@@ -10,14 +10,16 @@ import (
 	"github.com/okta/okta-sdk-golang/v2/okta/query"
 )
 
-var ADMIN_ROLES = []string{"SUPER_ADMIN", "ORG_ADMIN", "GROUP_ADMIN", "GROUP_MEMBERSHIP_ADMIN", "USER_ADMIN", "APP_ADMIN", "READ_ONLY_ADMIN", "MOBILE_ADMIN", "HELP_DESK_ADMIN", "REPORT_ADMIN", "API_ACCESS_MANAGEMENT_ADMIN", "CUSTOM"}
+var adminRoles = []string{"SUPER_ADMIN", "ORG_ADMIN", "GROUP_ADMIN", "GROUP_MEMBERSHIP_ADMIN", "USER_ADMIN", "APP_ADMIN", "READ_ONLY_ADMIN", "MOBILE_ADMIN", "HELP_DESK_ADMIN", "REPORT_ADMIN", "API_ACCESS_MANAGEMENT_ADMIN", "CUSTOM"}
 
-// func NewClient(ctx context.Context, conf ...ConfigSetter) (context.Context, *Client, error) {
+
+// MockClient is our client to simulate the okta golang sdk client
 type MockClient struct {
 	Group *GroupResource
 	User  *UserResource
 }
 
+// NewClient Creates a New Okta Client with all the necessary attributes
 func NewClient() *MockClient {
 	c := &MockClient{}
 	c.Group = &GroupResource{
@@ -31,6 +33,8 @@ func NewClient() *MockClient {
 	return c
 }
 
+// GroupResource contains all the information to add fake groups, and maps of Group Names
+// to Roles and Users
 type GroupResource struct {
 	Client     *MockClient
 	Groups     []*okta.Group
@@ -156,7 +160,7 @@ func (g *GroupResource) RemoveUserFromGroup(ctx context.Context, groupId string,
 }
 
 func (g *GroupResource) AssignRoleToGroup(ctx context.Context, groupId string, assignRoleRequest okta.AssignRoleRequest, qp *query.Params) (*okta.Role, *okta.Response, error) {
-	if !SliceContainsString(ADMIN_ROLES, assignRoleRequest.Type) {
+	if !SliceContainsString(adminRoles, assignRoleRequest.Type) {
 		return nil, nil, fmt.Errorf("invalid role")
 	}
 	group, err := g.GetGroupById(groupId)
@@ -303,6 +307,6 @@ func SliceContainsString(slice []string, str string) bool {
 
 func RandAdminRoleRequest() okta.AssignRoleRequest {
 	rand.Seed(time.Now().UnixNano())
-	roleRequest := NewAssignRoleRequest(ADMIN_ROLES[rand.Intn(len(ADMIN_ROLES))])
+	roleRequest := NewAssignRoleRequest(adminRoles[rand.Intn(len(adminRoles))])
 	return roleRequest
 }
