@@ -140,11 +140,11 @@ func TestGroupResource_AssignRoleToGroup(t *testing.T) {
 
 func TestGroupResource_ListGroupAssignedRoles(t *testing.T) {
 	t.Run("should return error if the group doesn't exist", func(t *testing.T) {
-		groupIdArg := "NonexistentGroup"
+		groupIDArg := "NonexistentGroup"
 		roleRequest := RandAdminRoleRequest()
 
 		client := NewClient()
-		_, _, err := client.Group.AssignRoleToGroup(context.TODO(), groupIdArg, roleRequest, nil)
+		_, _, err := client.Group.AssignRoleToGroup(context.TODO(), groupIDArg, roleRequest, nil)
 
 		if err == nil {
 			t.Errorf("Expected err, but didn't get one")
@@ -316,11 +316,11 @@ func TestGroupResource_RemoveUserFromGroup(t *testing.T) {
 
 func TestGroupResource_DeleteGroup(t *testing.T) {
 	t.Run("should err if group doesn't exist", func(t *testing.T) {
-		groupIdArg := "NonExistentId"
+		groupIDArg := "NonExistentId"
 
 		client := NewClient()
 
-		_, err := client.Group.DeleteGroup(context.TODO(), groupIdArg)
+		_, err := client.Group.DeleteGroup(context.TODO(), groupIDArg)
 
 		if err == nil {
 			t.Errorf("expected error but didn't get one")

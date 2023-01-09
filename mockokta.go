@@ -47,41 +47,41 @@ func (client *MockClient) ListGroups(ctx context.Context, qp *query.Params) ([]*
 	return client.Group.ListGroups(ctx, qp)
 }
 
-func (client *MockClient) ListGroupUsers(ctx context.Context, groupId string, qp *query.Params) ([]*okta.User, *okta.Response, error) {
-	return client.Group.ListGroupUsers(ctx, groupId, qp)
+func (client *MockClient) ListGroupUsers(ctx context.Context, groupID string, qp *query.Params) ([]*okta.User, *okta.Response, error) {
+	return client.Group.ListGroupUsers(ctx, groupID, qp)
 }
 
-func (client *MockClient) ListGroupAssignedRoles(ctx context.Context, groupId string, qp *query.Params) ([]*okta.Role, *okta.Response, error) {
-	return client.Group.ListGroupAssignedRoles(ctx, groupId, qp)
+func (client *MockClient) ListGroupAssignedRoles(ctx context.Context, groupID string, qp *query.Params) ([]*okta.Role, *okta.Response, error) {
+	return client.Group.ListGroupAssignedRoles(ctx, groupID, qp)
 }
 
 func (client *MockClient) CreateGroup(ctx context.Context, group okta.Group) (*okta.Group, *okta.Response, error) {
 	return client.Group.CreateGroup(ctx, group)
 }
 
-func (client *MockClient) DeleteGroup(ctx context.Context, groupId string) (*okta.Response,  error) {
-	return client.Group.DeleteGroup(ctx, groupId)
+func (client *MockClient) DeleteGroup(ctx context.Context, groupID string) (*okta.Response,  error) {
+	return client.Group.DeleteGroup(ctx, groupID)
 }
 
-func (client *MockClient) AssignRoleToGroup(ctx context.Context, groupId string, assignRoleRequest okta.AssignRoleRequest, qp *query.Params) (*okta.Role, *okta.Response, error) {
-	return client.Group.AssignRoleToGroup(ctx, groupId, assignRoleRequest, qp)
+func (client *MockClient) AssignRoleToGroup(ctx context.Context, groupID string, assignRoleRequest okta.AssignRoleRequest, qp *query.Params) (*okta.Role, *okta.Response, error) {
+	return client.Group.AssignRoleToGroup(ctx, groupID, assignRoleRequest, qp)
 }
 
 func (client *MockClient) ListUsers(ctx context.Context, qp *query.Params) ([]*okta.User, *okta.Response, error) {
 	return client.User.ListUsers(ctx, qp)
 }
 
-func (client *MockClient) AddUserToGroup(ctx context.Context, groupId string, userId string) (*okta.Response, error) {
-	return client.Group.AddUserToGroup(ctx, groupId, userId)
+func (client *MockClient) AddUserToGroup(ctx context.Context, groupID string, userId string) (*okta.Response, error) {
+	return client.Group.AddUserToGroup(ctx, groupID, userId)
 }
 
-func (client *MockClient) RemoveUserFromGroup(ctx context.Context, groupId string, userId string) (*okta.Response, error) {
-	return client.Group.RemoveUserFromGroup(ctx, groupId, userId)
+func (client *MockClient) RemoveUserFromGroup(ctx context.Context, groupID string, userId string) (*okta.Response, error) {
+	return client.Group.RemoveUserFromGroup(ctx, groupID, userId)
 }
 
-func (g *GroupResource) DeleteGroup(ctx context.Context, groupId string) (*okta.Response, error) {
+func (g *GroupResource) DeleteGroup(ctx context.Context, groupID string) (*okta.Response, error) {
 	for idx, group := range g.Groups {
-		if group.Id == groupId {
+		if group.Id == groupID {
 			g.Groups[idx] = g.Groups[len(g.Groups)-1]
 			g.Groups[len(g.Groups)-1] = &okta.Group{}
 			g.Groups = g.Groups[:len(g.Groups)-1]
@@ -122,8 +122,8 @@ func NewGroup(groupName string) *okta.Group {
 	}
 }
 
-func (g *GroupResource) AddUserToGroup(ctx context.Context, groupId string, userId string) (*okta.Response, error) {
-	group, err := g.GetGroupById(groupId)
+func (g *GroupResource) AddUserToGroup(ctx context.Context, groupID string, userId string) (*okta.Response, error) {
+	group, err := g.GetGroupById(groupID)
 	if err != nil {
 		return nil, err
 	}
@@ -137,8 +137,8 @@ func (g *GroupResource) AddUserToGroup(ctx context.Context, groupId string, user
 	return nil, nil
 }
 
-func (g *GroupResource) RemoveUserFromGroup(ctx context.Context, groupId string, userId string) (*okta.Response, error) {
-	group, err := g.GetGroupById(groupId)
+func (g *GroupResource) RemoveUserFromGroup(ctx context.Context, groupID string, userId string) (*okta.Response, error) {
+	group, err := g.GetGroupById(groupID)
 	if err != nil {
 		return nil, err
 	}
@@ -159,11 +159,11 @@ func (g *GroupResource) RemoveUserFromGroup(ctx context.Context, groupId string,
 	return nil, nil
 }
 
-func (g *GroupResource) AssignRoleToGroup(ctx context.Context, groupId string, assignRoleRequest okta.AssignRoleRequest, qp *query.Params) (*okta.Role, *okta.Response, error) {
+func (g *GroupResource) AssignRoleToGroup(ctx context.Context, groupID string, assignRoleRequest okta.AssignRoleRequest, qp *query.Params) (*okta.Role, *okta.Response, error) {
 	if !SliceContainsString(adminRoles, assignRoleRequest.Type) {
 		return nil, nil, fmt.Errorf("invalid role")
 	}
-	group, err := g.GetGroupById(groupId)
+	group, err := g.GetGroupById(groupID)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -178,8 +178,8 @@ func (g *GroupResource) AssignRoleToGroup(ctx context.Context, groupId string, a
 	return &role, nil, nil
 }
 
-func (g *GroupResource) ListGroupAssignedRoles(ctx context.Context, groupId string, qp *query.Params) ([]*okta.Role, *okta.Response, error) {
-	group, err := g.GetGroupById(groupId)
+func (g *GroupResource) ListGroupAssignedRoles(ctx context.Context, groupID string, qp *query.Params) ([]*okta.Role, *okta.Response, error) {
+	group, err := g.GetGroupById(groupID)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -197,8 +197,8 @@ func (g *GroupResource) GroupContainsRole(group okta.Group, roleType string) boo
 	return false
 }
 
-func (g *GroupResource) ListGroupUsers(ctx context.Context, groupId string, qp *query.Params) ([]*okta.User, *okta.Response, error) {
-	group, err := g.GetGroupById(groupId)
+func (g *GroupResource) ListGroupUsers(ctx context.Context, groupID string, qp *query.Params) ([]*okta.User, *okta.Response, error) {
+	group, err := g.GetGroupById(groupID)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -219,9 +219,9 @@ func (g *GroupResource) GroupContainsUser(group okta.Group, userEmail string) bo
 	return false
 }
 
-func (g *GroupResource) GetGroupById(groupId string) (*okta.Group, error) {
+func (g *GroupResource) GetGroupById(groupID string) (*okta.Group, error) {
 	for _, group := range g.Groups {
-		if group.Id == groupId {
+		if group.Id == groupID {
 			return group, nil
 		}
 	}
