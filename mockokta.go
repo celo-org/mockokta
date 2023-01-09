@@ -12,7 +12,6 @@ import (
 
 var adminRoles = []string{"SUPER_ADMIN", "ORG_ADMIN", "GROUP_ADMIN", "GROUP_MEMBERSHIP_ADMIN", "USER_ADMIN", "APP_ADMIN", "READ_ONLY_ADMIN", "MOBILE_ADMIN", "HELP_DESK_ADMIN", "REPORT_ADMIN", "API_ACCESS_MANAGEMENT_ADMIN", "CUSTOM"}
 
-
 // MockClient is our client to simulate the okta golang sdk client
 type MockClient struct {
 	Group *GroupResource
@@ -294,7 +293,7 @@ func (u *UserResource) GetUserByEmail(email string) (*okta.User, error) {
 	return nil, fmt.Errorf("user not found")
 }
 
-// GetUserById searches for user by userID and returns it
+// GetUserByID searches for user by userID and returns it
 func (u *UserResource) GetUserByID(userID string) (*okta.User, error) {
 	for _, user := range u.Users {
 		if user.Id == userID {
@@ -311,7 +310,7 @@ func NewRole(roleType string) okta.Role {
 	}
 }
 
-// NewRole Creates a new AssignRoleRequest and returns it
+// NewAssignRoleRequest Creates a new AssignRoleRequest and returns it
 func NewAssignRoleRequest(roleType string) okta.AssignRoleRequest {
 	return okta.AssignRoleRequest{
 		Type: roleType,
@@ -328,6 +327,7 @@ func SliceContainsString(slice []string, str string) bool {
 	return false
 }
 
+// RandAdminRoleRequest generates a random role from the valid admin roles
 func RandAdminRoleRequest() okta.AssignRoleRequest {
 	rand.Seed(time.Now().UnixNano())
 	roleRequest := NewAssignRoleRequest(adminRoles[rand.Intn(len(adminRoles))])
