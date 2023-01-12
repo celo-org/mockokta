@@ -215,7 +215,7 @@ func (g *GroupResource) GroupContainsRole(group okta.Group, roleType string) boo
 // ListGroupUsers will return a slice of all users in the specified group
 func (g *GroupResource) ListGroupUsers(ctx context.Context, groupID string, qp *query.Params) ([]*okta.User, *okta.Response, error) {
 	group, _ := g.GetGroupByID(groupID)
-	var users []*okta.User
+    users := make([]*okta.User, 0)
 	for _, user := range g.GroupUsers[group.Profile.Name] {
 		user, _ := g.Client.User.GetUserByEmail(user)
 		users = append(users, user)
