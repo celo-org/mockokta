@@ -43,10 +43,9 @@ type GroupResource struct {
 
 // Wrapper methods for Okta API Calls
 
-
 // Initialize is an empty method so we can match the okta client interface with tests
 func (client *MockClient) Initialize(ctx context.Context, conf ...okta.ConfigSetter) error {
-    return nil
+	return nil
 }
 
 // ListGroups is a wrapper to call client.Group.ListGroups to make it easier to match an interface for the okta client
@@ -70,7 +69,7 @@ func (client *MockClient) CreateGroup(ctx context.Context, group okta.Group) (*o
 }
 
 // DeleteGroup is a wrapper to call client.Group.DeleteGroup to make it easier to match an interface for the okta client
-func (client *MockClient) DeleteGroup(ctx context.Context, groupID string) (*okta.Response,  error) {
+func (client *MockClient) DeleteGroup(ctx context.Context, groupID string) (*okta.Response, error) {
 	return client.Group.DeleteGroup(ctx, groupID)
 }
 
@@ -197,8 +196,12 @@ func (g *GroupResource) AssignRoleToGroup(ctx context.Context, groupID string, a
 
 // ListGroupAssignedRoles will list all the roles for a specified groupID
 func (g *GroupResource) ListGroupAssignedRoles(ctx context.Context, groupID string, qp *query.Params) ([]*okta.Role, *okta.Response, error) {
+
 	group, _ := g.GetGroupByID(groupID)
-	return g.GroupRoles[group.Profile.Name], nil, nil
+	roles := make([]*okta.Role, 0, 0)
+
+	roles = append(roles, g.GroupRoles[group.Profile.Name]...)
+	return roles, nil, nil
 }
 
 // GroupContainsRole will search a group for a certain role and return a boolean of it found it
@@ -215,7 +218,7 @@ func (g *GroupResource) GroupContainsRole(group okta.Group, roleType string) boo
 // ListGroupUsers will return a slice of all users in the specified group
 func (g *GroupResource) ListGroupUsers(ctx context.Context, groupID string, qp *query.Params) ([]*okta.User, *okta.Response, error) {
 	group, _ := g.GetGroupByID(groupID)
-    users := make([]*okta.User, 0)
+	users := make([]*okta.User, 0, 0)
 	for _, user := range g.GroupUsers[group.Profile.Name] {
 		user, _ := g.Client.User.GetUserByEmail(user)
 		users = append(users, user)
@@ -223,7 +226,7 @@ func (g *GroupResource) ListGroupUsers(ctx context.Context, groupID string, qp *
 	return users, nil, nil
 }
 
-// GroupContainsUser will search a group for a user by email and return a boolean indicating 
+// GroupContainsUser will search a group for a user by email and return a boolean indicating
 // if it found the user or not
 func (g *GroupResource) GroupContainsUser(group okta.Group, userEmail string) bool {
 	for _, groupUser := range g.GroupUsers[group.Profile.Name] {
@@ -280,7 +283,9 @@ func (u *UserResource) CreateUser(userEmail string) (*okta.User, error) {
 
 // ListUsers returns a list of all okta Users
 func (u *UserResource) ListUsers(ctx context.Context, qp *query.Params) ([]*okta.User, *okta.Response, error) {
-	return u.Users, nil, nil
+	users := make([]*okta.User, 0, 0)
+	users = append(users, u.Users...)
+	return users, nil, nil
 }
 
 // GetUserByEmail searches for a user with the email and returns it

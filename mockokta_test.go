@@ -138,16 +138,22 @@ func TestGroupResource_AssignRoleToGroup(t *testing.T) {
 	})
 }
 
+// This is because of a bug where we were returning []*okta.Role(nil) instead of []*okta.Role
+// so the solution was to create the map with make, and append to it.  Otherwise production
+// code could have a bug if checking a variable against nil, which would pass here since
+// []*okta.Role(nil) will == nil but []*okta.Role{} won't
 func TestGroupResource_ListGroupAssignedRoles(t *testing.T) {
-	t.Run("should return error if the group doesn't exist", func(t *testing.T) {
-		groupIDArg := "NonexistentGroup"
-		roleRequest := RandAdminRoleRequest()
+	t.Run("should return empty slice instead of slice(nil)", func(t *testing.T) {
+		groupNameArg := "NonExistentGroup"
 
 		client := NewClient()
-		_, _, err := client.Group.AssignRoleToGroup(context.TODO(), groupIDArg, roleRequest, nil)
+		group, _, _ := client.Group.CreateGroup(context.TODO(), *NewGroup(groupNameArg))
 
-		if err == nil {
-			t.Errorf("Expected err, but didn't get one")
+		want := []*okta.Role{}
+		got, _, _ := client.ListGroupAssignedRoles(context.TODO(), group.Id, nil)
+
+		if reflect.TypeOf(got) != reflect.TypeOf(want) || got == nil {
+			t.Errorf("got %#v want %#v", got, want)
 		}
 
 	})
@@ -334,18 +340,18 @@ func TestGroupResource_DeleteGroup(t *testing.T) {
 
 		client.Group.DeleteGroup(context.TODO(), group.Id)
 
-        want := []*okta.Group{}
-    	got, _, _ := client.Group.ListGroups(context.TODO(), nil)
+		want := []*okta.Group{}
+		got, _, _ := client.Group.ListGroups(context.TODO(), nil)
 
-        if !reflect.DeepEqual(got, want) { 
-            t.Errorf("got %v want %v", got, want)
-        }
-        
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("got %v want %v", got, want)
+		}
+
 	})
 	t.Run("should not delete extra groups", func(t *testing.T) {
 		groupNameArg1 := "TestGroup1"
-        groupNameArg2 := "TestGroup2"
-        groupNameArg3 := "TestGroup3"
+		groupNameArg2 := "TestGroup2"
+		groupNameArg3 := "TestGroup3"
 
 		client := NewClient()
 		group1, _, _ := client.Group.CreateGroup(context.TODO(), *NewGroup(groupNameArg1))
@@ -354,56 +360,84 @@ func TestGroupResource_DeleteGroup(t *testing.T) {
 
 		client.Group.DeleteGroup(context.TODO(), group2.Id)
 
-        want := []*okta.Group{group1, group3}
-    	got, _, _ := client.Group.ListGroups(context.TODO(), nil)
+		want := []*okta.Group{group1, group3}
+		got, _, _ := client.Group.ListGroups(context.TODO(), nil)
 
-        if !reflect.DeepEqual(got, want) { 
-            t.Errorf("got %v want %v", got, want)
-        }
-        
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("got %v want %v", got, want)
+		}
+
 	})
 
 }
 
 func TestGroupResource_ListGroupUsers(t *testing.T) {
-	userEmailArg1 := "TestUser1@test.com"
-	userEmailArg2 := "TestUser2@test.com"
-	userEmailArg3 := "TestUser3@test.com"
+	t.Run("list existing users", func(t *testing.T) {
+		userEmailArg1 := "TestUser1@test.com"
+		userEmailArg2 := "TestUser2@test.com"
+		userEmailArg3 := "TestUser3@test.com"
 
-	groupNameArg := "TestGroup"
+		groupNameArg := "TestGroup"
 
-	client := NewClient()
-	group, _, _ := client.Group.CreateGroup(context.TODO(), *NewGroup(groupNameArg))
-	user1, _ := client.User.CreateUser(userEmailArg1)
-	user2, _ := client.User.CreateUser(userEmailArg2)
-	user3, _ := client.User.CreateUser(userEmailArg3)
+		client := NewClient()
+		group, _, _ := client.Group.CreateGroup(context.TODO(), *NewGroup(groupNameArg))
+		user1, _ := client.User.CreateUser(userEmailArg1)
+		user2, _ := client.User.CreateUser(userEmailArg2)
+		user3, _ := client.User.CreateUser(userEmailArg3)
 
-	client.Group.AddUserToGroup(context.TODO(), group.Id, user1.Id)
-	client.Group.AddUserToGroup(context.TODO(), group.Id, user2.Id)
-	client.Group.AddUserToGroup(context.TODO(), group.Id, user3.Id)
+		client.Group.AddUserToGroup(context.TODO(), group.Id, user1.Id)
+		client.Group.AddUserToGroup(context.TODO(), group.Id, user2.Id)
+		client.Group.AddUserToGroup(context.TODO(), group.Id, user3.Id)
 
-	want := []*okta.User{user1, user2, user3}
-	got, _, _ := client.Group.ListGroupUsers(context.TODO(), group.Id, nil)
+		want := []*okta.User{user1, user2, user3}
+		got, _, _ := client.Group.ListGroupUsers(context.TODO(), group.Id, nil)
 
-	if !reflect.DeepEqual(got, want) {
-		t.Errorf("got %v want %v", got, want)
-	}
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("got %v want %v", got, want)
+		}
+	})
+	t.Run("empty users should return empty slice and not nil", func(t *testing.T) {
+		groupNameArg := "TestGroup"
+
+		client := NewClient()
+		group, _, _ := client.Group.CreateGroup(context.TODO(), *NewGroup(groupNameArg))
+
+		want := []*okta.User{}
+		got, _, _ := client.Group.ListGroupUsers(context.TODO(), group.Id, nil)
+
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("got %#v want %#v", got, want)
+		}
+	})
+
 }
 
 func TestUserResource_ListUsers(t *testing.T) {
-	client := NewClient()
-	userEmailArg1 := "TestUser1"
-	userEmailArg2 := "TestUser2"
+	t.Run("should list users", func(t *testing.T) {
+		client := NewClient()
+		userEmailArg1 := "TestUser1"
+		userEmailArg2 := "TestUser2"
 
-	user1, _ := client.User.CreateUser(userEmailArg1)
-	user2, _ := client.User.CreateUser(userEmailArg2)
+		user1, _ := client.User.CreateUser(userEmailArg1)
+		user2, _ := client.User.CreateUser(userEmailArg2)
 
-	want := []*okta.User{user1, user2}
-	got, _, _ := client.User.ListUsers(context.TODO(), nil)
+		want := []*okta.User{user1, user2}
+		got, _, _ := client.User.ListUsers(context.TODO(), nil)
 
-	if !reflect.DeepEqual(got, want) {
-		t.Errorf("got %v want %v", got, want)
-	}
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("got %v want %v", got, want)
+		}
+	})
+	t.Run("empty slice should not be nil", func(t *testing.T) {
+		client := NewClient()
+
+		got, _, _ := client.User.ListUsers(context.TODO(), nil)
+
+		if got == nil {
+			t.Errorf("got %#v want non nil slice", got)
+		}
+	})
+
 }
 
 var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
