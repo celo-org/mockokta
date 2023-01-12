@@ -45,7 +45,7 @@ type GroupResource struct {
 
 
 // Initialize is an empty method so we can match the okta client interface with tests
-func (client *OktaClient) Initialize(ctx context.Context, conf ...okta.ConfigSetter) error {
+func (client *MockClient) Initialize(ctx context.Context, conf ...okta.ConfigSetter) error {
     return nil
 }
 
