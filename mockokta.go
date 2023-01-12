@@ -43,6 +43,12 @@ type GroupResource struct {
 
 // Wrapper methods for Okta API Calls
 
+
+// Initialize is an empty method so we can match the okta client interface with tests
+func (client *OktaClient) Initialize(ctx context.Context, conf ...okta.ConfigSetter) error {
+    return nil
+}
+
 // ListGroups is a wrapper to call client.Group.ListGroups to make it easier to match an interface for the okta client
 func (client *MockClient) ListGroups(ctx context.Context, qp *query.Params) ([]*okta.Group, *okta.Response, error) {
 	return client.Group.ListGroups(ctx, qp)
