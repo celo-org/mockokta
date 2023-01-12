@@ -198,7 +198,7 @@ func (g *GroupResource) AssignRoleToGroup(ctx context.Context, groupID string, a
 func (g *GroupResource) ListGroupAssignedRoles(ctx context.Context, groupID string, qp *query.Params) ([]*okta.Role, *okta.Response, error) {
 
 	group, _ := g.GetGroupByID(groupID)
-	roles := make([]*okta.Role, 0, 0)
+	roles := make([]*okta.Role, 0)
 
 	roles = append(roles, g.GroupRoles[group.Profile.Name]...)
 	return roles, nil, nil
@@ -218,7 +218,7 @@ func (g *GroupResource) GroupContainsRole(group okta.Group, roleType string) boo
 // ListGroupUsers will return a slice of all users in the specified group
 func (g *GroupResource) ListGroupUsers(ctx context.Context, groupID string, qp *query.Params) ([]*okta.User, *okta.Response, error) {
 	group, _ := g.GetGroupByID(groupID)
-	users := make([]*okta.User, 0, 0)
+	users := make([]*okta.User, 0)
 	for _, user := range g.GroupUsers[group.Profile.Name] {
 		user, _ := g.Client.User.GetUserByEmail(user)
 		users = append(users, user)
@@ -283,7 +283,7 @@ func (u *UserResource) CreateUser(userEmail string) (*okta.User, error) {
 
 // ListUsers returns a list of all okta Users
 func (u *UserResource) ListUsers(ctx context.Context, qp *query.Params) ([]*okta.User, *okta.Response, error) {
-	users := make([]*okta.User, 0, 0)
+	users := make([]*okta.User, 0)
 	users = append(users, u.Users...)
 	return users, nil, nil
 }
