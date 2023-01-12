@@ -198,9 +198,6 @@ func (g *GroupResource) AssignRoleToGroup(ctx context.Context, groupID string, a
 // ListGroupAssignedRoles will list all the roles for a specified groupID
 func (g *GroupResource) ListGroupAssignedRoles(ctx context.Context, groupID string, qp *query.Params) ([]*okta.Role, *okta.Response, error) {
 	group, err := g.GetGroupByID(groupID)
-	if err != nil {
-		return nil, nil, err
-	}
 	return g.GroupRoles[group.Profile.Name], nil, nil
 }
 
@@ -218,9 +215,6 @@ func (g *GroupResource) GroupContainsRole(group okta.Group, roleType string) boo
 // ListGroupUsers will return a slice of all users in the specified group
 func (g *GroupResource) ListGroupUsers(ctx context.Context, groupID string, qp *query.Params) ([]*okta.User, *okta.Response, error) {
 	group, err := g.GetGroupByID(groupID)
-	if err != nil {
-		return nil, nil, err
-	}
 	var users []*okta.User
 	for _, user := range g.GroupUsers[group.Profile.Name] {
 		user, _ := g.Client.User.GetUserByEmail(user)
