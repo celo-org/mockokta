@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/okta/okta-sdk-golang/v2 v2.16.0
-	github.com/stretchr/testify v1.8.4
+	github.com/stretchr/testify v1.9.0
 	google.golang.org/api v0.114.0
 )
 
