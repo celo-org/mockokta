@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/okta/okta-sdk-golang/v2 v2.16.0
-	github.com/stretchr/testify v1.9.0
+	github.com/stretchr/testify v1.12.1
 )
 
 require (
@@ -15,6 +15,7 @@ require (
 	github.com/kelseyhightower/envconfig v1.4.0 // indirect
 	github.com/patrickmn/go-cache v0.0.0-20180815053127-5633e0862627 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	golang.org/x/crypto v0.21.0 // indirect
 	gopkg.in/square/go-jose.v2 v2.6.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
